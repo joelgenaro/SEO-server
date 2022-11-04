@@ -15,27 +15,75 @@ class NextController extends Controller
     public function index()
     {
         //
-        $posts = DB::table('companies')
-            ->orderBy(DB::raw('ISNULL(Location), Location'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(Metro), Metro'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(Region), Region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(Locality), Locality'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(Industry), Industry'), 'ASC')
-            ->orderBy(DB::raw('ISNULL("Industry 2"), "Industry 2"'), 'ASC')
+        $data = DB::table('companies')
+            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
+            ->paginate(10);
+
+        $countries = DB::table('companies')
+            ->select('location')
+            ->whereNotNull('location')
+            ->distinct()
             ->get();
 
-        return $posts;
+        $sectorOne = DB::table('companies')
+            ->select('industry')
+            ->whereNotNull('industry')
+            ->distinct()
+            ->get();
+
+        $sectorTwo = DB::table('companies')
+            ->select('industry_two')
+            ->whereNotNull('industry_two')
+            ->distinct()
+            ->get();
+
+        return ['data' => $data, 'countries' => $countries, 'sectorOne' => $sectorOne, 'sectorTwo' => $sectorTwo];
     }
 
     /**
-     * Store a newly created resource in storage.
+     * get search options
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function getSearchOptions($type, $value)
     {
         //
+        $childrenType = null;
+        $parentType = null;
+
+        switch ($type) {
+            case 'country':
+                $childrenType = 'metro';
+                $parentType = "location";
+                break;
+            case 'city':
+                $childrenType = 'region';
+                $parentType = "metro";
+
+                break;
+            case 'town':
+                $childrenType = 'locality';
+                $parentType = "region";
+
+                break;
+
+            default:
+                # code...
+                break;
+        }
+
+        $data = DB::table('companies')
+            ->select($childrenType)
+            ->where($parentType, '=', $value)
+            ->whereNotNull($childrenType)
+            ->distinct()
+            ->get();
+
+        return $data;
     }
 
     /**
@@ -44,9 +92,79 @@ class NextController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function getData(Request $request)
     {
         //
+        $location = null;
+        $metro = null;
+        $region = null;
+        $locality = null;
+        $industry = null;
+        $industry_two = null;
+        $industry_three = null;
+
+        foreach ($request->formData as $key => $value) {
+            # code...
+            switch ($value['name']) {
+                case 'location':
+                    $location = $value['value'];
+                    break;
+                case 'metro':
+                    $metro = $value['value'];
+                    break;
+                case 'region':
+                    $region = $value['value'];
+                    break;
+                case 'locality':
+                    $locality = $value['value'];
+                    break;
+                case 'industry':
+                    $industry = $value['value'];
+                    break;
+                case 'industry_two':
+                    $industry_two = $value['value'];
+                    break;
+                case 'industry_three':
+                    $industry_three = $value['value'];
+                    break;
+
+                default:
+                    # code...
+                    break;
+            }
+        }
+
+        $data = DB::table('companies')
+            ->when($location, function ($query, $location) {
+                $query->where('location', $location);
+            })
+            ->when($metro, function ($query, $metro) {
+                $query->where('metro', $metro);
+            })
+            ->when($region, function ($query, $region) {
+                $query->where('region', $region);
+            })
+            ->when($locality, function ($query, $locality) {
+                $query->where('locality', $locality);
+            })
+            ->when($industry, function ($query, $industry) {
+                $query->where('industry', $industry);
+            })
+            ->when($industry_two, function ($query, $industry_two) {
+                $query->where('industry_two', $industry_two);
+            })
+            ->when($industry_three, function ($query, $industry_three) {
+                $query->where('industry_three', $industry_three);
+            })
+            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
+            ->paginate(10);
+
+        return $data;
     }
 
     /**
