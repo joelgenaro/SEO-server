@@ -22,4 +22,5 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 Route::get('/index', [NextController::class, 'index']);
 
 Route::get('/getSearchOptions/{type}/{value}', [NextController::class, 'getSearchOptions'])->name('getSearchOptions');
-Route::post('/getData', [NextController::class, 'getData'])->name('getData');
+Route::get('/getData', [NextController::class, 'getData'])->name('getData');
+Route::get('/getDataWithText', [NextController::class, 'getDataWithText'])->name('getDataWithText');

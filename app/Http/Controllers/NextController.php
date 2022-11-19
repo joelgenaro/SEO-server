@@ -27,18 +27,21 @@ class NextController extends Controller
         $countries = DB::table('companies')
             ->select('location')
             ->whereNotNull('location')
+            ->orderBy('location', 'ASC')
             ->distinct()
             ->get();
 
         $sectorOne = DB::table('companies')
             ->select('industry')
             ->whereNotNull('industry')
+            ->orderBy('industry', 'ASC')
             ->distinct()
             ->get();
 
         $sectorTwo = DB::table('companies')
             ->select('industry_two')
             ->whereNotNull('industry_two')
+            ->orderBy('industry_two', 'ASC')
             ->distinct()
             ->get();
 
@@ -80,6 +83,7 @@ class NextController extends Controller
             ->select($childrenType)
             ->where($parentType, '=', $value)
             ->whereNotNull($childrenType)
+            ->orderBy($childrenType, 'ASC')
             ->distinct()
             ->get();
 
@@ -102,35 +106,40 @@ class NextController extends Controller
         $industry = null;
         $industry_two = null;
         $industry_three = null;
+        
+        var_dump($request->formData);
 
-        foreach ($request->formData as $key => $value) {
+        if ($request->formData) {
             # code...
-            switch ($value['name']) {
-                case 'location':
-                    $location = $value['value'];
-                    break;
-                case 'metro':
-                    $metro = $value['value'];
-                    break;
-                case 'region':
-                    $region = $value['value'];
-                    break;
-                case 'locality':
-                    $locality = $value['value'];
-                    break;
-                case 'industry':
-                    $industry = $value['value'];
-                    break;
-                case 'industry_two':
-                    $industry_two = $value['value'];
-                    break;
-                case 'industry_three':
-                    $industry_three = $value['value'];
-                    break;
+            foreach ($request->formData as $key => $value) {
+                # code...
+                switch ($value['name']) {
+                    case 'location':
+                        $location = $value['value'];
+                        break;
+                    case 'metro':
+                        $metro = $value['value'];
+                        break;
+                    case 'region':
+                        $region = $value['value'];
+                        break;
+                    case 'locality':
+                        $locality = $value['value'];
+                        break;
+                    case 'industry':
+                        $industry = $value['value'];
+                        break;
+                    case 'industry_two':
+                        $industry_two = $value['value'];
+                        break;
+                    case 'industry_three':
+                        $industry_three = $value['value'];
+                        break;
 
-                default:
-                    # code...
-                    break;
+                    default:
+                        # code...
+                        break;
+                }
             }
         }
 
@@ -167,26 +176,27 @@ class NextController extends Controller
         return $data;
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function getDataWithText(Request $request)
     {
-        //
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+        $sector = null;
+        $city = null;
+
+        $sector = $request->sector;
+        $city = $request->city;
+
+        $data = DB::table('companies')
+            ->Where('industry', 'like', '%' . $sector . '%')
+            ->orWhere('industry_two', 'like', '%' . $sector . '%')
+            ->orWhere('metro', 'like', '%' . $city . '%')
+            ->orWhere('region', 'like', '%' . $city . '%')
+            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
+            ->paginate(10);
+
+        return $data;
+
     }
 }
