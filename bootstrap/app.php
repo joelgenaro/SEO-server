@@ -9,11 +9,7 @@
 | which serves as the "glue" for all the components of Laravel, and is
 | the IoC container for the system binding all of the various parts.
 |
- */
-
-header('Access-Control-Allow-Origin', '*');
-header('Access-Control-Allow-Methods', 'GET, POST, PUT, PATCH, DELETE, OPTIONS');
-header('Access-Control-Allow-Headers', 'Content-Type, Authorization');
+*/
 
 $app = new Illuminate\Foundation\Application(
     $_ENV['APP_BASE_PATH'] ?? dirname(__DIR__)
@@ -28,7 +24,7 @@ $app = new Illuminate\Foundation\Application(
 | we will be able to resolve them when needed. The kernels serve the
 | incoming requests to this application from both the web and CLI.
 |
- */
+*/
 
 $app->singleton(
     Illuminate\Contracts\Http\Kernel::class,
@@ -54,6 +50,6 @@ $app->singleton(
 | the calling script so we can separate the building of the instances
 | from the actual running of the application and sending responses.
 |
- */
+*/
 
 return $app;

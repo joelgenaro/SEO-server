@@ -13,17 +13,17 @@ return [
     |
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
-     */
+    */
 
-    'paths' => ['api/*','api/getData/*', 'api/getDataWithText/*','*'],
+    'paths' => ['*'],
 
-    'allowed_methods' => ['GET','POST','*'],
+    'allowed_methods' => ['*'],
 
-    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000','https://seo-frontend.netlify.app')],
+    'allowed_origins' => [env('FRONTEND_URL', 'http://localhost:3000')],
 
-    'allowed_origins_patterns' => ['Google/'],
+    'allowed_origins_patterns' => [],
 
-    'allowed_headers' => ['X-Custom-Header', 'Upgrade-Insecure-Requests', '*'],
+    'allowed_headers' => ['*'],
 
     'exposed_headers' => [],
 

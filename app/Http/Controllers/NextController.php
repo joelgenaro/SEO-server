@@ -8,8 +8,9 @@ use Illuminate\Support\Facades\DB;
 class NextController extends Controller
 {
     /**
-     * Display a listing of the resource.
+     * Handle the incoming request.
      *
+     * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
     public function index()
@@ -107,8 +108,6 @@ class NextController extends Controller
         $industry_two = null;
         $industry_three = null;
         
-        var_dump($request->formData);
-
         if ($request->formData) {
             # code...
             foreach ($request->formData as $key => $value) {
