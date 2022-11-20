@@ -107,40 +107,14 @@ class NextController extends Controller
         $industry = null;
         $industry_two = null;
         $industry_three = null;
-        
-        if ($request->formData) {
-            # code...
-            foreach ($request->formData as $key => $value) {
-                # code...
-                switch ($value['name']) {
-                    case 'location':
-                        $location = $value['value'];
-                        break;
-                    case 'metro':
-                        $metro = $value['value'];
-                        break;
-                    case 'region':
-                        $region = $value['value'];
-                        break;
-                    case 'locality':
-                        $locality = $value['value'];
-                        break;
-                    case 'industry':
-                        $industry = $value['value'];
-                        break;
-                    case 'industry_two':
-                        $industry_two = $value['value'];
-                        break;
-                    case 'industry_three':
-                        $industry_three = $value['value'];
-                        break;
 
-                    default:
-                        # code...
-                        break;
-                }
-            }
-        }
+        $location = $request->location;
+        $metro = $request->metro;
+        $region = $request->region;
+        $locality = $request->locality;
+        $industry = $request->industry;
+        $industry_two = $request->industry_two;
+        $industry_three = $request->industry_three;
 
         $data = DB::table('companies')
             ->when($location, function ($query, $location) {
