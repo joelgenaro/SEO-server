@@ -20,7 +20,6 @@ class NextController extends Controller
             ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
             ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
             ->paginate(10);
@@ -39,14 +38,8 @@ class NextController extends Controller
             ->distinct()
             ->get();
 
-        $sectorTwo = DB::table('companies')
-            ->select('industry_two')
-            ->whereNotNull('industry_two')
-            ->orderBy('industry_two', 'ASC')
-            ->distinct()
-            ->get();
 
-        return ['data' => $data, 'countries' => $countries, 'sectorOne' => $sectorOne, 'sectorTwo' => $sectorTwo];
+        return ['data' => $data, 'countries' => $countries, 'sectorOne' => $sectorOne];
     }
 
     /**
@@ -64,15 +57,15 @@ class NextController extends Controller
                 $childrenType = 'metro';
                 $parentType = "location";
                 break;
+
             case 'city':
                 $childrenType = 'region';
                 $parentType = "metro";
-
                 break;
-            case 'town':
-                $childrenType = 'locality';
-                $parentType = "region";
 
+            case 'sectorOne':
+                $childrenType = 'industry_two';
+                $parentType = "industry";
                 break;
 
             default:
@@ -103,18 +96,14 @@ class NextController extends Controller
         $location = null;
         $metro = null;
         $region = null;
-        $locality = null;
         $industry = null;
         $industry_two = null;
-        $industry_three = null;
 
-        $location = $request->location;
-        $metro = $request->metro;
-        $region = $request->region;
-        $locality = $request->locality;
-        $industry = $request->industry;
-        $industry_two = $request->industry_two;
-        $industry_three = $request->industry_three;
+        $location = trim($request->location, " ");
+        $metro = trim($request->metro, " ");
+        $region = trim($request->region, " ");
+        $industry = trim($request->industry, " ");
+        $industry_two = trim($request->industry_two, " ");
 
         $data = DB::table('companies')
             ->when($location, function ($query, $location) {
@@ -126,22 +115,15 @@ class NextController extends Controller
             ->when($region, function ($query, $region) {
                 $query->where('region', $region);
             })
-            ->when($locality, function ($query, $locality) {
-                $query->where('locality', $locality);
-            })
             ->when($industry, function ($query, $industry) {
                 $query->where('industry', $industry);
             })
             ->when($industry_two, function ($query, $industry_two) {
                 $query->where('industry_two', $industry_two);
             })
-            ->when($industry_three, function ($query, $industry_three) {
-                $query->where('industry_three', $industry_three);
-            })
             ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
             ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
             ->paginate(10);
