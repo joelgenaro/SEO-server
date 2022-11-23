@@ -44,6 +44,7 @@ class NextController extends Controller
         $childrenType = null;
         $parentType = null;
         $sectorOne = null;
+        $data = null;
 
         switch ($type) {
             case 'country':
@@ -94,11 +95,6 @@ class NextController extends Controller
     public function getData(Request $request)
     {
         //
-        $location = null;
-        $metro = null;
-        $region = null;
-        $industry = null;
-        $industry_two = null;
 
         $location = trim($request->location, " ");
         $metro = trim($request->metro, " ");
