@@ -17,17 +17,16 @@ class NextController extends Controller
     {
         //
         $data = DB::table('companies')
-            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
         $countries = DB::table('companies')
-            ->select('location')
-            ->whereNotNull('location')
-            ->orderBy('location', 'ASC')
+            ->select('location_country')
+            ->whereNotNull('location_country')
+            ->orderBy('location_country', 'ASC')
             ->distinct()
             ->get();
 
@@ -49,11 +48,11 @@ class NextController extends Controller
         switch ($type) {
             case 'country':
                 $childrenType = 'metro';
-                $parentType = "location";
+                $parentType = "location_country";
 
                 $sectorOne = DB::table('companies')
                     ->select('industry')
-                    ->where('location', '=', $value)
+                    ->where('location_country', '=', $value)
                     ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
                     ->distinct()
@@ -104,7 +103,7 @@ class NextController extends Controller
 
         $data = DB::table('companies')
             ->when($location, function ($query, $location) {
-                $query->where('location', $location);
+                $query->where('location_country', $location);
             })
             ->when($metro, function ($query, $metro) {
                 $query->where('metro', $metro);
@@ -118,11 +117,10 @@ class NextController extends Controller
             ->when($industry_two, function ($query, $industry_two) {
                 $query->where('industry_two', $industry_two);
             })
-            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
         return $data;
@@ -144,8 +142,6 @@ class NextController extends Controller
             ->orWhere('region', 'like', '%' . $city . '%')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(industry), industry'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(industry_two), industry_two'), 'ASC')
             ->paginate(10);
 
         return $data;
