@@ -29,21 +29,7 @@ class NextController extends Controller
             ->distinct()
             ->get();
 
-        $sectorOne = DB::table('companies')
-            ->select('industry')
-            ->whereNotNull('industry')
-            ->orderBy('industry', 'ASC')
-            ->distinct()
-            ->get();
-
-        $sectorTwo = DB::table('companies')
-            ->select('industry_two')
-            ->whereNotNull('industry_two')
-            ->orderBy('industry_two', 'ASC')
-            ->distinct()
-            ->get();
-
-        return ['data' => $data, 'countries' => $countries, 'sectorOne' => $sectorOne, 'sectorTwo' => $sectorTwo];
+        return ['data' => $data, 'countries' => $countries];
     }
 
     /**
@@ -56,11 +42,31 @@ class NextController extends Controller
         $childrenType = null;
         $parentType = null;
         $data = null;
+        $sectorOne = null;
+        $sectorTwo = null;
 
         switch ($type) {
             case 'country':
                 $childrenType = 'region';
                 $parentType = "location_country";
+
+                $sectorOne = DB::table('companies')
+                    ->select('industry')
+                    ->where('location_country', '=', $value)
+                    ->whereNotNull('industry')
+                    ->orderBy('industry', 'ASC')
+                    ->distinct()
+                    ->get();
+
+
+                $sectorTwo = DB::table('companies')
+                    ->select('industry_two')
+                    ->where('location_country', '=', $value)
+                    ->whereNotNull('industry_two')
+                    ->orderBy('industry_two', 'ASC')
+                    ->distinct()
+                    ->get();
+
                 break;
 
             case 'city':
@@ -81,7 +87,7 @@ class NextController extends Controller
             ->distinct()
             ->get();
 
-        return $data;
+        return ['data' => $data, 'sectorOne' => $sectorOne, 'sectorTwo' => $sectorTwo];
     }
 
     /**
