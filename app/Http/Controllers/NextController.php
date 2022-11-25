@@ -41,6 +41,7 @@ class NextController extends Controller
         //
         $childrenType = null;
         $parentType = null;
+        $parentOfSector = null;
         $data = null;
         $sectorOne = null;
         $sectorTwo = null;
@@ -49,35 +50,35 @@ class NextController extends Controller
             case 'country':
                 $childrenType = 'region';
                 $parentType = "location_country";
-
-                $sectorOne = DB::table('companies')
-                    ->select('industry')
-                    ->where('location_country', '=', $value)
-                    ->whereNotNull('industry')
-                    ->orderBy('industry', 'ASC')
-                    ->distinct()
-                    ->get();
-
-
-                $sectorTwo = DB::table('companies')
-                    ->select('industry_two')
-                    ->where('location_country', '=', $value)
-                    ->whereNotNull('industry_two')
-                    ->orderBy('industry_two', 'ASC')
-                    ->distinct()
-                    ->get();
-
+                $parentOfSector = "location_country";
                 break;
 
             case 'city':
                 $childrenType = 'locality';
                 $parentType = "region";
+                $parentOfSector = "region";
                 break;
 
             default:
                 # code...
                 break;
         }
+
+        $sectorOne = DB::table('companies')
+            ->select('industry')
+            ->where($parentOfSector, '=', $value)
+            ->whereNotNull('industry')
+            ->orderBy('industry', 'ASC')
+            ->distinct()
+            ->get();
+
+        $sectorTwo = DB::table('companies')
+            ->select('industry_two')
+            ->where($parentOfSector, '=', $value)
+            ->whereNotNull('industry_two')
+            ->orderBy('industry_two', 'ASC')
+            ->distinct()
+            ->get();
 
         $data = DB::table('companies')
             ->select($childrenType)
