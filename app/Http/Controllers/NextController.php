@@ -44,7 +44,6 @@ class NextController extends Controller
         $parentOfSector = null;
         $data = null;
         $sectorOne = null;
-        $sectorTwo = null;
 
         switch ($type) {
             case 'country':
@@ -59,26 +58,27 @@ class NextController extends Controller
                 $parentOfSector = "region";
                 break;
 
+            case 'sectorOne':
+                $childrenType = 'industry_two';
+                $parentType = "industry";
+                $parentOfSector = null;
+                break;
+
             default:
                 # code...
                 break;
         }
 
-        $sectorOne = DB::table('companies')
-            ->select('industry')
-            ->where($parentOfSector, '=', $value)
-            ->whereNotNull('industry')
-            ->orderBy('industry', 'ASC')
-            ->distinct()
-            ->get();
-
-        $sectorTwo = DB::table('companies')
-            ->select('industry_two')
-            ->where($parentOfSector, '=', $value)
-            ->whereNotNull('industry_two')
-            ->orderBy('industry_two', 'ASC')
-            ->distinct()
-            ->get();
+        if ($parentOfSector != null) {
+            # code...
+            $sectorOne = DB::table('companies')
+                ->select('industry')
+                ->where($parentOfSector, '=', $value)
+                ->whereNotNull('industry')
+                ->orderBy('industry', 'ASC')
+                ->distinct()
+                ->get();
+        }
 
         $data = DB::table('companies')
             ->select($childrenType)
@@ -88,7 +88,7 @@ class NextController extends Controller
             ->distinct()
             ->get();
 
-        return ['data' => $data, 'sectorOne' => $sectorOne, 'sectorTwo' => $sectorTwo];
+        return ['data' => $data, 'sectorOne' => $sectorOne];
     }
 
     /**
@@ -143,10 +143,11 @@ class NextController extends Controller
         $data = DB::table('companies')
             ->Where('industry', 'like', '%' . $sector . '%')
             ->orWhere('industry_two', 'like', '%' . $sector . '%')
-            ->orWhere('metro', 'like', '%' . $city . '%')
-            ->orWhere('region', 'like', '%' . $city . '%')
-            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+            ->Where('region', 'like', '%' . $city . '%')
+            ->orWhere('locality', 'like', '%' . $city . '%')
+            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
         return $data;
