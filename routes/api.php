@@ -23,7 +23,7 @@ Route::middleware(['auth:sanctum'])->get('/user', function (Request $request) {
 
 Route::middleware([CustomCors::class])->group(function () {
     Route::get('/index', [NextController::class, 'index']);
-    Route::get('/getSearchOptions/{type}/{value}', [NextController::class, 'getSearchOptions'])->name('getSearchOptions');
+    Route::get('/getSearchOptions', [NextController::class, 'getSearchOptions'])->name('getSearchOptions');
     Route::get('/getData', [NextController::class, 'getData'])->name('getData');
     Route::get('/getDataWithText', [NextController::class, 'getDataWithText'])->name('getDataWithText');
 });

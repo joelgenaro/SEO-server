@@ -18,15 +18,16 @@ class NextController extends Controller
     {
         //
         $data = DB::table('companies')
-            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
         $countries = DB::table('companies')
-            ->select('location_country')
-            ->whereNotNull('location_country')
-            ->orderBy('location_country', 'ASC')
+            ->select('location')
+            ->whereNotNull('location')
+            ->orderBy('location', 'ASC')
             ->distinct()
             ->get();
 
@@ -37,24 +38,67 @@ class NextController extends Controller
      * get search options
      *
      */
-    public function getSearchOptions($type, $value)
+    public function getSearchOptions(Request $request)
     {
         //
-        $childrenType = null;
-        $parentType = null;
-        $sectorOne = null;
-        $sectorTwo = null;
+        $type = null;
+        $country = null;
+        $city = null;
+        $town = null;
+        $locality = null;
         $data = null;
+
+        $type = trim($request->type, " ");
+        $country = trim($request->country, " ");
+        $city = trim($request->city, " ");
+        $town = trim($request->town, " ");
+        $locality = trim($request->locality, " ");
 
         switch ($type) {
             case 'country':
-                $childrenType = 'region';
-                $parentType = "location_country";
+                $data = DB::table('companies')
+                    ->select('region')
+                    ->where('location', '=', $country)
+                    ->whereNotNull('region')
+                    ->orderBy('region', 'ASC')
+                    ->distinct()
+                    ->get();
+
                 break;
 
             case 'city':
-                $childrenType = 'locality';
-                $parentType = "region";
+                $data = DB::table('companies')
+                    ->select('metro')
+                    ->where('location', '=', $country)
+                    ->where('region', '=', $city)
+                    ->whereNotNull('metro')
+                    ->orderBy('metro', 'ASC')
+                    ->distinct()
+                    ->get();
+                break;
+
+            case 'town':
+                $data = DB::table('companies')
+                    ->select('locality')
+                    ->where('location', '=', $country)
+                    ->where('region', '=', $city)
+                    ->where('metro', '=', $town)
+                    ->whereNotNull('locality')
+                    ->orderBy('locality', 'ASC')
+                    ->distinct()
+                    ->get();
+                break;
+
+            case 'locality':
+                $data = DB::table('companies')
+                    ->select('industry', 'industry_two')
+                    ->where('location', '=', $country)
+                    ->where('region', '=', $city)
+                    ->where('metro', '=', $town)
+                    ->where('locality', '=', $locality)
+                    ->orderBy('industry', 'ASC')
+                    ->distinct()
+                    ->get();
                 break;
 
             default:
@@ -62,31 +106,7 @@ class NextController extends Controller
                 break;
         }
 
-        $sectorOne = DB::table('companies')
-            ->select('industry')
-            ->where($parentType, '=', $value)
-            ->whereNotNull('industry')
-            ->orderBy('industry', 'ASC')
-            ->distinct()
-            ->get();
-
-        $sectorTwo = DB::table('companies')
-            ->select('industry_two')
-            ->where($parentType, '=', $value)
-            ->whereNotNull('industry_two')
-            ->orderBy('industry_two', 'ASC')
-            ->distinct()
-            ->get();
-
-        $data = DB::table('companies')
-            ->select($childrenType)
-            ->where($parentType, '=', $value)
-            ->whereNotNull($childrenType)
-            ->orderBy($childrenType, 'ASC')
-            ->distinct()
-            ->get();
-
-        return ['data' => $data, 'sectorOne' => $sectorOne, 'sectorTwo' => $sectorTwo];
+        return $data;
     }
 
     /**
@@ -98,21 +118,39 @@ class NextController extends Controller
     public function getData(Request $request)
     {
         //
+        $country = null;
+        $city = null;
+        $town = null;
+        $locality = null;
+        $sector = null;
+        $sectorOne = null;
+        $sectorTwo = null;
+
         $country = trim($request->country, " ");
         $city = trim($request->city, " ");
         $town = trim($request->town, " ");
-        $sectorOne = trim($request->sectorOne, " ");
-        $sectorTwo = trim($request->sectorTwo, " ");
+        $locality = trim($request->locality, " ");
+        $sector = trim($request->sector, " ");
+
+        if ($sector) {
+            # code...
+            $sector = explode("-", $sector);
+            $sectorOne = $sector[0] != 'null' ? $sector[0] : null;
+            $sectorTwo = $sector[1] != 'null' ? $sector[1] : null;
+        }
 
         $data = DB::table('companies')
             ->when($country, function ($query, $country) {
-                $query->where('location_country', '=', $country);
+                $query->where('location', '=', $country);
             })
             ->when($city, function ($query, $city) {
                 $query->where('region', '=', $city);
             })
             ->when($town, function ($query, $town) {
-                $query->where('locality', '=', $town);
+                $query->where('metro', '=', $town);
+            })
+            ->when($locality, function ($query, $locality) {
+                $query->where('locality', '=', $locality);
             })
             ->when($sectorOne, function ($query, $sectorOne) {
                 $query->where('industry', '=', $sectorOne);
@@ -120,8 +158,9 @@ class NextController extends Controller
             ->when($sectorTwo, function ($query, $sectorTwo) {
                 $query->where('industry_two', '=', $sectorTwo);
             })
-            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
@@ -131,19 +170,17 @@ class NextController extends Controller
     public function getDataWithText(Request $request)
     {
 
-        $sector = null;
-        $city = null;
-
-        $sector = $request->sector;
-        $city = $request->city;
+        $search = null;
+        $search = $request->search;
 
         $data = DB::table('companies')
-            ->Where('industry', 'like', '%' . $sector . '%')
-            ->orWhere('industry_two', 'like', '%' . $sector . '%')
-            ->Where('region', 'like', '%' . $city . '%')
-            ->orWhere('locality', 'like', '%' . $city . '%')
-            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
+            ->Where('location', 'like', '%' . $search . '%')
+            ->orWhere('region', 'like', '%' . $search . '%')
+            ->orWhere('metro', 'like', '%' . $search . '%')
+            ->orWhere('locality', 'like', '%' . $search . '%')
+            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
