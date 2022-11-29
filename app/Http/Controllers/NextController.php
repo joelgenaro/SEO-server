@@ -47,6 +47,7 @@ class NextController extends Controller
         $town = null;
         $locality = null;
         $data = null;
+        $sector = null;
 
         $type = trim($request->type, " ");
         $country = trim($request->country, " ");
@@ -64,6 +65,12 @@ class NextController extends Controller
                     ->distinct()
                     ->get();
 
+                $sector = DB::table('companies')
+                    ->select('industry', 'industry_two')
+                    ->where('location', '=', $country)
+                    ->orderBy('industry', 'ASC')
+                    ->distinct()
+                    ->get();
                 break;
 
             case 'city':
@@ -73,6 +80,14 @@ class NextController extends Controller
                     ->where('region', '=', $city)
                     ->whereNotNull('metro')
                     ->orderBy('metro', 'ASC')
+                    ->distinct()
+                    ->get();
+
+                $sector = DB::table('companies')
+                    ->select('industry', 'industry_two')
+                    ->where('location', '=', $country)
+                    ->where('region', '=', $city)
+                    ->orderBy('industry', 'ASC')
                     ->distinct()
                     ->get();
                 break;
@@ -87,10 +102,19 @@ class NextController extends Controller
                     ->orderBy('locality', 'ASC')
                     ->distinct()
                     ->get();
+
+                $sector = DB::table('companies')
+                    ->select('industry', 'industry_two')
+                    ->where('location', '=', $country)
+                    ->where('region', '=', $city)
+                    ->where('metro', '=', $town)
+                    ->orderBy('industry', 'ASC')
+                    ->distinct()
+                    ->get();
                 break;
 
             case 'locality':
-                $data = DB::table('companies')
+                $sector = DB::table('companies')
                     ->select('industry', 'industry_two')
                     ->where('location', '=', $country)
                     ->where('region', '=', $city)
@@ -99,6 +123,7 @@ class NextController extends Controller
                     ->orderBy('industry', 'ASC')
                     ->distinct()
                     ->get();
+
                 break;
 
             default:
@@ -106,7 +131,7 @@ class NextController extends Controller
                 break;
         }
 
-        return $data;
+        return ['main' => $data, 'sector' => $sector];
     }
 
     /**
