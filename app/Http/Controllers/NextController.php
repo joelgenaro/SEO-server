@@ -47,13 +47,14 @@ class NextController extends Controller
         $town = null;
         $locality = null;
         $data = null;
-        $sector = null;
+        $sectorOne = null;
 
         $type = trim($request->type, " ");
         $country = trim($request->country, " ");
         $city = trim($request->city, " ");
         $town = trim($request->town, " ");
         $locality = trim($request->locality, " ");
+        $industry = trim($request->sectorOne, " ");
 
         switch ($type) {
             case 'country':
@@ -65,9 +66,10 @@ class NextController extends Controller
                     ->distinct()
                     ->get();
 
-                $sector = DB::table('companies')
-                    ->select('industry', 'industry_two')
+                $sectorOne = DB::table('companies')
+                    ->select('industry')
                     ->where('location', '=', $country)
+                    ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
                     ->distinct()
                     ->get();
@@ -83,10 +85,11 @@ class NextController extends Controller
                     ->distinct()
                     ->get();
 
-                $sector = DB::table('companies')
-                    ->select('industry', 'industry_two')
+                $sectorOne = DB::table('companies')
+                    ->select('industry')
                     ->where('location', '=', $country)
                     ->where('region', '=', $city)
+                    ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
                     ->distinct()
                     ->get();
@@ -103,24 +106,49 @@ class NextController extends Controller
                     ->distinct()
                     ->get();
 
-                $sector = DB::table('companies')
-                    ->select('industry', 'industry_two')
+                $sectorOne = DB::table('companies')
+                    ->select('industry')
                     ->where('location', '=', $country)
                     ->where('region', '=', $city)
                     ->where('metro', '=', $town)
+                    ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
                     ->distinct()
                     ->get();
                 break;
 
             case 'locality':
-                $sector = DB::table('companies')
-                    ->select('industry', 'industry_two')
+                $sectorOne = DB::table('companies')
+                    ->select('industry')
                     ->where('location', '=', $country)
                     ->where('region', '=', $city)
                     ->where('metro', '=', $town)
                     ->where('locality', '=', $locality)
+                    ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
+                    ->distinct()
+                    ->get();
+
+            case 'sectorOne':
+                $data = DB::table('companies')
+                    ->select('industry_two')
+                    ->when($country, function ($query, $country) {
+                        $query->where('location', '=', $country);
+                    })
+                    ->when($city, function ($query, $city) {
+                        $query->where('region', '=', $city);
+                    })
+                    ->when($town, function ($query, $town) {
+                        $query->where('metro', '=', $town);
+                    })
+                    ->when($locality, function ($query, $locality) {
+                        $query->where('locality', '=', $locality);
+                    })
+                    ->when($industry, function ($query, $industry) {
+                        $query->where('industry', '=', $industry);
+                    })
+                    ->whereNotNull('industry_two')
+                    ->orderBy('industry_two', 'ASC')
                     ->distinct()
                     ->get();
 
@@ -131,7 +159,7 @@ class NextController extends Controller
                 break;
         }
 
-        return ['main' => $data, 'sector' => $sector];
+        return ['main' => $data, 'sectorOne' => $sectorOne];
     }
 
     /**
@@ -147,7 +175,6 @@ class NextController extends Controller
         $city = null;
         $town = null;
         $locality = null;
-        $sector = null;
         $sectorOne = null;
         $sectorTwo = null;
 
@@ -155,14 +182,8 @@ class NextController extends Controller
         $city = trim($request->city, " ");
         $town = trim($request->town, " ");
         $locality = trim($request->locality, " ");
-        $sector = trim($request->sector, " ");
-
-        if ($sector) {
-            # code...
-            $sector = explode("-", $sector);
-            $sectorOne = $sector[0] != 'null' ? $sector[0] : null;
-            $sectorTwo = $sector[1] != 'null' ? $sector[1] : null;
-        }
+        $sectorOne = trim($request->sectorOne, " ");
+        $sectorTwo = trim($request->sectorTwo, " ");
 
         $data = DB::table('companies')
             ->when($country, function ($query, $country) {
