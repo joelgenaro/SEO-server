@@ -18,16 +18,16 @@ class NextController extends Controller
     {
         //
         $data = DB::table('companies')
-            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
         $countries = DB::table('companies')
-            ->select('location')
-            ->whereNotNull('location')
-            ->orderBy('location', 'ASC')
+            ->select('location_country')
+            ->whereNotNull('location_country')
+            ->orderBy('location_country', 'ASC')
             ->distinct()
             ->get();
 
@@ -60,7 +60,7 @@ class NextController extends Controller
             case 'country':
                 $data = DB::table('companies')
                     ->select('region')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->whereNotNull('region')
                     ->orderBy('region', 'ASC')
                     ->distinct()
@@ -68,7 +68,7 @@ class NextController extends Controller
 
                 $sectorOne = DB::table('companies')
                     ->select('industry')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
                     ->distinct()
@@ -78,7 +78,7 @@ class NextController extends Controller
             case 'city':
                 $data = DB::table('companies')
                     ->select('metro')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->where('region', '=', $city)
                     ->whereNotNull('metro')
                     ->orderBy('metro', 'ASC')
@@ -87,7 +87,7 @@ class NextController extends Controller
 
                 $sectorOne = DB::table('companies')
                     ->select('industry')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->where('region', '=', $city)
                     ->whereNotNull('industry')
                     ->orderBy('industry', 'ASC')
@@ -98,7 +98,7 @@ class NextController extends Controller
             case 'town':
                 $data = DB::table('companies')
                     ->select('locality')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->where('region', '=', $city)
                     ->where('metro', '=', $town)
                     ->whereNotNull('locality')
@@ -108,7 +108,7 @@ class NextController extends Controller
 
                 $sectorOne = DB::table('companies')
                     ->select('industry')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->where('region', '=', $city)
                     ->where('metro', '=', $town)
                     ->whereNotNull('industry')
@@ -120,7 +120,7 @@ class NextController extends Controller
             case 'locality':
                 $sectorOne = DB::table('companies')
                     ->select('industry')
-                    ->where('location', '=', $country)
+                    ->where('location_country', '=', $country)
                     ->where('region', '=', $city)
                     ->where('metro', '=', $town)
                     ->where('locality', '=', $locality)
@@ -133,7 +133,7 @@ class NextController extends Controller
                 $data = DB::table('companies')
                     ->select('industry_two')
                     ->when($country, function ($query, $country) {
-                        $query->where('location', '=', $country);
+                        $query->where('location_country', '=', $country);
                     })
                     ->when($city, function ($query, $city) {
                         $query->where('region', '=', $city);
@@ -187,7 +187,7 @@ class NextController extends Controller
 
         $data = DB::table('companies')
             ->when($country, function ($query, $country) {
-                $query->where('location', '=', $country);
+                $query->where('location_country', '=', $country);
             })
             ->when($city, function ($query, $city) {
                 $query->where('region', '=', $city);
@@ -204,7 +204,7 @@ class NextController extends Controller
             ->when($sectorTwo, function ($query, $sectorTwo) {
                 $query->where('industry_two', '=', $sectorTwo);
             })
-            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
@@ -220,11 +220,11 @@ class NextController extends Controller
         $search = $request->search;
 
         $data = DB::table('companies')
-            ->Where('location', 'like', '%' . $search . '%')
+            ->Where('location_country', 'like', '%' . $search . '%')
             ->orWhere('region', 'like', '%' . $search . '%')
             ->orWhere('metro', 'like', '%' . $search . '%')
             ->orWhere('locality', 'like', '%' . $search . '%')
-            ->orderBy(DB::raw('ISNULL(location), location'), 'ASC')
+            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
