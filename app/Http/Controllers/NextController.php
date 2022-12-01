@@ -217,13 +217,13 @@ class NextController extends Controller
     {
 
         $search = null;
-        $search = $request->search;
+        $search = trim($request->search, " ");
 
         $data = DB::table('companies')
-            ->Where('location_country', 'like', '%' . $search . '%')
-            ->orWhere('region', 'like', '%' . $search . '%')
-            ->orWhere('metro', 'like', '%' . $search . '%')
-            ->orWhere('locality', 'like', '%' . $search . '%')
+            ->Where("location_country", "like", "%{$search}%")
+            ->orWhere("region", "like", "%{$search}%")
+            ->orWhere("metro", "like", "%{$search}%")
+            ->orWhere("locality", "like", "%{$search}%")
             ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
