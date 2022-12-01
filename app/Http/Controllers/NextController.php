@@ -218,12 +218,44 @@ class NextController extends Controller
 
         $search = null;
         $search = trim($request->search, " ");
+        $search = array_values(array_filter(explode(" ", $search)));
 
         $data = DB::table('companies')
-            ->Where("location_country", "like", "%{$search}%")
-            ->orWhere("region", "like", "%{$search}%")
-            ->orWhere("metro", "like", "%{$search}%")
-            ->orWhere("locality", "like", "%{$search}%")
+            ->Where(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('full_name', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('location_country', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('region', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('metro', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('locality', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('industry', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('industry_two', 'like', '%' . $search[$i] . '%');
+                }
+            })
             ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
