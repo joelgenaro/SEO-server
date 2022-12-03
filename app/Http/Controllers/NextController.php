@@ -216,48 +216,18 @@ class NextController extends Controller
     public function getDataWithText(Request $request)
     {
 
-        $search = null;
-        $search = trim($request->search, " ");
-        $search = array_values(array_filter(explode(" ", $search)));
+        $sector = null;
+        $country = null;
+        $sector = trim($request->sector, " ");
+        $country = trim($request->contry, " ");
 
         $data = DB::table('companies')
-            ->where('industry', '!=', '(NULL)')
-            ->where('industry_two', '!=', '(NULL)')
-            ->Where(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('location_country', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('region', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('metro', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('locality', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('industry', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('industry_two', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('full_name', 'like', '%' . $search[$i] . '%');
-                }
-            })
+            ->Where('industry', '=', $sector)
+            ->orWhere('industry_two', '=', $sector)
+            ->orWhere('location_country', '=', $country)
+            ->orWhere('region', '=', $country)
+            ->orWhere('metro', '=', $country)
+            ->orWhere('locality', '=', $country)
             ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
             ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
             ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
