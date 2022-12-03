@@ -221,8 +221,8 @@ class NextController extends Controller
         $search = array_values(array_filter(explode(" ", $search)));
 
         $data = DB::table('companies')
-            ->whereNotNull('industry')
-            ->whereNotNull('industry_two')
+            ->where('industry', '!=', '(NULL)')
+            ->where('industry_two', '!=', '(NULL)')
             ->Where(function ($query) use ($search) {
                 for ($i = 0; $i < count($search); $i++) {
                     $query->orwhere('location_country', 'like', '%' . $search[$i] . '%');
