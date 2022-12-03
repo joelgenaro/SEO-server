@@ -223,11 +223,6 @@ class NextController extends Controller
         $data = DB::table('companies')
             ->Where(function ($query) use ($search) {
                 for ($i = 0; $i < count($search); $i++) {
-                    $query->orwhere('full_name', 'like', '%' . $search[$i] . '%');
-                }
-            })
-            ->orWhere(function ($query) use ($search) {
-                for ($i = 0; $i < count($search); $i++) {
                     $query->orwhere('location_country', 'like', '%' . $search[$i] . '%');
                 }
             })
@@ -254,6 +249,11 @@ class NextController extends Controller
             ->orWhere(function ($query) use ($search) {
                 for ($i = 0; $i < count($search); $i++) {
                     $query->orwhere('industry_two', 'like', '%' . $search[$i] . '%');
+                }
+            })
+            ->orWhere(function ($query) use ($search) {
+                for ($i = 0; $i < count($search); $i++) {
+                    $query->orwhere('full_name', 'like', '%' . $search[$i] . '%');
                 }
             })
             ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
