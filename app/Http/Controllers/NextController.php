@@ -215,30 +215,47 @@ class NextController extends Controller
 
     public function getDataWithText(Request $request)
     {
-
-        $sector = null;
-        $country = null;
-        $sectors = ['industry', 'industry_two'];
-        $countries = ['location_country', 'region', 'metro', 'locality'];
+        $data = null;
         $sector = trim($request->sector, " ");
         $country = trim($request->country, " ");
 
-        $data = DB::table('companies')
-            ->Where(function ($query) use ($sectors, $sector) {
-                for ($i = 0; $i < count($sectors); $i++) {
-                    $query->orwhere($sectors[$i], '=', $sector);
-                }
-            })
-            ->Where(function ($query) use ($countries, $country) {
-                for ($i = 0; $i < count($countries); $i++) {
-                    $query->orwhere($countries[$i], '=', $country);
-                }
-            })
-            ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
-            ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
-            ->paginate(10);
+        $sectors = ['industry', 'industry_two'];
+        $countries = ['location_country'];
+
+        if ($country == '') {
+            # code...
+            $data = DB::table('companies')
+                ->Where('industry', $sector)
+                ->orWhere('industry_two', $sector)
+                ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
+                ->paginate(10);
+
+        }
+        if ($country != '' && $sector == '') {
+            # code...
+            $data = DB::table('companies')
+                ->Where('location_country', $country)
+                ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
+                ->paginate(10);
+        }
+        if ($country != '' && $sector != '') {
+            $data = DB::table('companies')
+                ->where('location_country', $country)
+                ->where(function ($query) use ($sector) {
+                    $query->where('industry', '=', $sector)
+                        ->orWhere('industry_two', '=', $sector);
+                })
+                ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
+                ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
+                ->paginate(10);
+        }
 
         return $data;
 
