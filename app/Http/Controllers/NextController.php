@@ -219,14 +219,11 @@ class NextController extends Controller
         $sector = trim($request->sector, " ");
         $country = trim($request->country, " ");
 
-        $sectors = ['industry', 'industry_two'];
-        $countries = ['location_country'];
-
         if ($country == '') {
             # code...
             $data = DB::table('companies')
-                ->Where('industry', $sector)
-                ->orWhere('industry_two', $sector)
+                ->Where('industry', 'like', '%' . $sector . '%')
+                ->orWhere('industry_two', 'like', '%' . $sector . '%')
                 ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
@@ -237,7 +234,12 @@ class NextController extends Controller
         if ($country != '' && $sector == '') {
             # code...
             $data = DB::table('companies')
-                ->Where('location_country', $country)
+                ->Where('location_country', 'like', '%' . $country . '%')
+                ->orWhere('region', 'like', '%' . $country . '%')
+                ->orWhere('metro', 'like', '%' . $country . '%')
+                ->orWhere('locality', 'like', '%' . $country . '%')
+                ->orWhere('full_name', 'like', '%' . $country . '%')
+                ->orWhere('Company_Name', 'like', '%' . $country . '%')
                 ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
@@ -246,11 +248,19 @@ class NextController extends Controller
         }
         if ($country != '' && $sector != '') {
             $data = DB::table('companies')
-                ->where('location_country', $country)
                 ->where(function ($query) use ($sector) {
-                    $query->where('industry', '=', $sector)
-                        ->orWhere('industry_two', '=', $sector);
+                    $query->where('industry', 'like', '%' . $sector . '%')
+                        ->orWhere('industry_two', 'like', '%' . $sector . '%');
                 })
+                ->where(function ($query) use ($country) {
+                    $query->where('location_country', 'like', '%' . $country . '%')
+                        ->orWhere('region', 'like', '%' . $country . '%')
+                        ->orWhere('metro', 'like', '%' . $country . '%')
+                        ->orWhere('locality', 'like', '%' . $country . '%')
+                        ->orWhere('full_name', 'like', '%' . $country . '%')
+                        ->orWhere('Company_Name', 'like', '%' . $country . '%');
+                })
+                ->orderBy(DB::raw('ISNULL(location_country), location_country'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(region), region'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(metro), metro'), 'ASC')
                 ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
