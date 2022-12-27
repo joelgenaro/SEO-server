@@ -8,12 +8,6 @@ use Illuminate\Support\Facades\DB;
 
 class NextController extends Controller
 {
-    /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function index()
     {
         //
@@ -34,10 +28,6 @@ class NextController extends Controller
         return ['data' => $data, 'countries' => $countries];
     }
 
-    /**
-     * get search options
-     *
-     */
     public function getSearchOptions(Request $request)
     {
         //
@@ -162,15 +152,11 @@ class NextController extends Controller
         return ['main' => $data, 'sectorOne' => $sectorOne];
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
     public function getData(Request $request)
     {
         //
+        $data = null;
+        $countries = null;
         $country = null;
         $city = null;
         $town = null;
@@ -210,12 +196,20 @@ class NextController extends Controller
             ->orderBy(DB::raw('ISNULL(locality), locality'), 'ASC')
             ->paginate(10);
 
-        return $data;
+        $countries = DB::table('companies')
+            ->select('location_country')
+            ->whereNotNull('location_country')
+            ->orderBy('location_country', 'ASC')
+            ->distinct()
+            ->get();
+
+        return ['data' => $data, 'countries' => $countries];
     }
 
     public function getDataWithText(Request $request)
     {
         $data = null;
+        $countries = null;
         $sector = trim($request->sector, " ");
         $country = trim($request->country, " ");
 
@@ -267,7 +261,13 @@ class NextController extends Controller
                 ->paginate(10);
         }
 
-        return $data;
+        $countries = DB::table('companies')
+            ->select('location_country')
+            ->whereNotNull('location_country')
+            ->orderBy('location_country', 'ASC')
+            ->distinct()
+            ->get();
 
+        return ['data' => $data, 'countries' => $countries];
     }
 }
